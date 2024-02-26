@@ -49,6 +49,7 @@ type options struct {
 	operatorOpAMPBridgeImage            string
 	openshiftRoutesAvailability         openshift.RoutesAvailability
 	labelsFilter                        []string
+	namespaces                          []string
 }
 
 func WithAutoDetect(a autodetect.AutoDetect) Option {
@@ -177,5 +178,11 @@ func WithLabelFilters(labelFilters []string) Option {
 		}
 
 		o.labelsFilter = filters
+	}
+}
+
+func WithNamespaces(namespaces []string) Option {
+	return func(o *options) {
+		o.namespaces = namespaces
 	}
 }
