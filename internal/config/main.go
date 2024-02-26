@@ -57,6 +57,7 @@ type Config struct {
 	openshiftRoutesAvailability         openshift.RoutesAvailability
 	labelsFilter                        []string
 	annotationsFilter                   []string
+	namespaces                          []string
 }
 
 // New constructs a new configuration based on the given options.
@@ -97,6 +98,7 @@ func New(opts ...Option) Config {
 		autoInstrumentationNginxImage:       o.autoInstrumentationNginxImage,
 		labelsFilter:                        o.labelsFilter,
 		annotationsFilter:                   o.annotationsFilter,
+		namespaces:                          o.namespaces,
 	}
 }
 
@@ -210,4 +212,9 @@ func (c *Config) LabelsFilter() []string {
 // AnnotationsFilter Returns the filters converted to regex strings used to filter out unwanted labels from propagations.
 func (c *Config) AnnotationsFilter() []string {
 	return c.annotationsFilter
+}
+
+// Namespaces Returns the namespaces to be watched.
+func (c *Config) Namespaces() []string {
+	return c.namespaces
 }
