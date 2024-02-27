@@ -54,6 +54,7 @@ type Config struct {
 	autoInstrumentationJavaImage        string
 	openshiftRoutesAvailability         openshift.RoutesAvailability
 	labelsFilter                        []string
+	namespaces                          []string
 }
 
 // New constructs a new configuration based on the given options.
@@ -91,6 +92,7 @@ func New(opts ...Option) Config {
 		autoInstrumentationApacheHttpdImage: o.autoInstrumentationApacheHttpdImage,
 		autoInstrumentationNginxImage:       o.autoInstrumentationNginxImage,
 		labelsFilter:                        o.labelsFilter,
+		namespaces:                          o.namespaces,
 	}
 }
 
@@ -189,4 +191,9 @@ func (c *Config) AutoInstrumentationNginxImage() string {
 // LabelsFilter Returns the filters converted to regex strings used to filter out unwanted labels from propagations.
 func (c *Config) LabelsFilter() []string {
 	return c.labelsFilter
+}
+
+// Namespaces Returns the namespaces to be watched.
+func (c *Config) Namespaces() []string {
+	return c.namespaces
 }
