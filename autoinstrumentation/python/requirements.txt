@@ -32,6 +32,7 @@ opentelemetry-instrumentation-grpc==0.43b0
 opentelemetry-instrumentation-httpx==0.43b0
 opentelemetry-instrumentation-jinja2==0.43b0
 opentelemetry-instrumentation-kafka-python==0.43b0
+opentelemetry-instrumentation-aiokafka==0.1.0
 opentelemetry-instrumentation-logging==0.43b0
 opentelemetry-instrumentation-mysql==0.43b0
 opentelemetry-instrumentation-mysqlclient==0.43b0

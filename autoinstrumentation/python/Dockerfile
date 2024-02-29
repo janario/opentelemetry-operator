@@ -15,7 +15,8 @@ WORKDIR /operator-build
 
 ADD requirements.txt .
 
-RUN mkdir workspace && pip install --target workspace -r requirements.txt
+RUN --mount=type=secret,target=/root/.pip/pip.conf,id=pip-conf,uid=0,gid=0,required=true \
+    mkdir workspace && pip install --target workspace -r requirements.txt
 
 FROM busybox
 
