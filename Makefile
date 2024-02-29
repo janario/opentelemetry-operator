@@ -263,7 +263,7 @@ scorecard-tests: operator-sdk
 .PHONY: container
 container: GOOS = linux
 container: manager
-	docker build -t ${IMG} --platform linux/amd64,linux/arm64 .
+	docker build -t ${IMG} --platform linux/amd64 .
 
 # Push the container image, used only for local dev purposes
 .PHONY: container-push
