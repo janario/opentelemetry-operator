@@ -293,7 +293,7 @@ func (in *OpenTelemetryCollectorSpec) DeepCopyInto(out *OpenTelemetryCollectorSp
 	}
 	if in.ReadinessProbe != nil {
 		in, out := &in.ReadinessProbe, &out.ReadinessProbe
-		*out = new(v1.Probe)
+		*out = new(Probe)
 		(*in).DeepCopyInto(*out)
 	}
 	out.Observability = in.Observability
