@@ -11,6 +11,7 @@ spec:
 #        command:
 #          - sleep
 #          - '3'
+#          - '1'
   config: |
     extensions:
       health_check:
