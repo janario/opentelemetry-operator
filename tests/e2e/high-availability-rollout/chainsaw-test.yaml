@@ -27,6 +27,10 @@ spec:
                   app.kubernetes.io/name: ha-collector
               status:
                 phase: Running
+                containerStatuses:
+                  - name: otc-container
+                    ready: true
+                    started: true
 
     - name: step-01
       try:
