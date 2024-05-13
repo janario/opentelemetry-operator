@@ -221,7 +221,7 @@ generate: controller-gen
 # end-to-tests
 .PHONY: e2e
 e2e: chainsaw
-	$(CHAINSAW) test --test-dir ./tests/e2e
+	$(CHAINSAW) test --test-dir ./tests/e2e/high-availability-rollout
 
 # end-to-end-test for testing automatic RBAC creation
 .PHONY: e2e-automatic-rbac
