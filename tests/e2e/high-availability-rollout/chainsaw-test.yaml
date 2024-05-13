@@ -24,7 +24,7 @@ spec:
               kind: Pod
               metadata:
                 labels:
-                  app.kubernetes.io/name: collector-collector
+                  app.kubernetes.io/name: ha-collector
               status:
                 phase: Running
 
@@ -53,6 +53,6 @@ spec:
               - -f
               - requests-and-rollout
 #        - sleep:
-#            duration: 120s
+#            duration: 600s
 
 
