@@ -5,7 +5,16 @@ metadata:
 spec:
   mode: ($mode)
   replicas: 2
+#  lifecycle:
+#    preStop:
+#      exec:
+#        command:
+#          - sleep
+#          - '3'
   config: |
+    extensions:
+      health_check:
+        endpoint: ${POD_IP}:13133
     receivers:
       otlp:
         protocols:
@@ -17,6 +26,8 @@ spec:
       debug:
 
     service:
+      extensions:
+        - health_check
       pipelines:
         traces:
           receivers: [otlp]

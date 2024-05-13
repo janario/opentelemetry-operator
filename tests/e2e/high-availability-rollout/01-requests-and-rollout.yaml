@@ -23,25 +23,12 @@ spec:
           apt update
           apt install -y siege
           
-          echo "limit = 3000" > ~/.siegerc
-          
-          # wait[10s]
-          # rollout > wait[rollout] > wait[20s] *5=100s
-          sleep 10 && \
-            kubectl -n ${K8S_NAMESPACE} rollout restart ${COL_MODE}/ha-collector && kubectl -n ${K8S_NAMESPACE} rollout status ${COL_MODE}/ha-collector && sleep 20 && \
-            kubectl -n ${K8S_NAMESPACE} rollout restart ${COL_MODE}/ha-collector && kubectl -n ${K8S_NAMESPACE} rollout status ${COL_MODE}/ha-collector && sleep 20 && \
-            kubectl -n ${K8S_NAMESPACE} rollout restart ${COL_MODE}/ha-collector && kubectl -n ${K8S_NAMESPACE} rollout status ${COL_MODE}/ha-collector && sleep 20 && \
-            kubectl -n ${K8S_NAMESPACE} rollout restart ${COL_MODE}/ha-collector && kubectl -n ${K8S_NAMESPACE} rollout status ${COL_MODE}/ha-collector && sleep 20 && \
-            kubectl -n ${K8S_NAMESPACE} rollout restart ${COL_MODE}/ha-collector && kubectl -n ${K8S_NAMESPACE} rollout status ${COL_MODE}/ha-collector && sleep 20 \
+          sleep 5 \
+            && kubectl -n ${K8S_NAMESPACE} rollout restart ${COL_MODE}/ha-collector && kubectl -n ${K8S_NAMESPACE} rollout status ${COL_MODE}/ha-collector && sleep 10 \
+            && kubectl -n ${K8S_NAMESPACE} rollout restart ${COL_MODE}/ha-collector && kubectl -n ${K8S_NAMESPACE} rollout status ${COL_MODE}/ha-collector && sleep 10 \
+            && kubectl -n ${K8S_NAMESPACE} rollout restart ${COL_MODE}/ha-collector && kubectl -n ${K8S_NAMESPACE} rollout status ${COL_MODE}/ha-collector && sleep 10 \
+            && kubectl -n ${K8S_NAMESPACE} rollout restart ${COL_MODE}/ha-collector && kubectl -n ${K8S_NAMESPACE} rollout status ${COL_MODE}/ha-collector && sleep 10 \
+            && kubectl -n ${K8S_NAMESPACE} rollout restart ${COL_MODE}/ha-collector && kubectl -n ${K8S_NAMESPACE} rollout status ${COL_MODE}/ha-collector && sleep 10 \
           &
-          
           echo "Starting siege"
-          
-          # Good case [without the rollout]
-          # "transactions":			      576592,
-          #	"availability":			      100.00,
-          # 
-          # Bad case
-          # "transactions":			      196548,
-          # "availability":			       99.46,
-          siege -b -c 500 -t2m http://ha-collector.${K8S_NAMESPACE}:4318
+          siege -d1 -c 30 -t60s http://ha-collector.${K8S_NAMESPACE}:4318

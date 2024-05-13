@@ -42,7 +42,7 @@ spec:
               status:
                 phase: Running
         - command:
-            timeout: 5m
+            timeout: 2m
             entrypoint: kubectl
             args:
               - -n
@@ -53,6 +53,6 @@ spec:
               - -f
               - requests-and-rollout
 #        - sleep:
-#            duration: 600s
+#            duration: 300s
 
 
