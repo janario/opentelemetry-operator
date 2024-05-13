@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: requests-and-rollout
+spec:
+  securityContext:
+    runAsUser: 0
+  serviceAccountName: otel-collector
+  containers:
+    - name: siege
+      image: bitnami/kubectl
+      env:
+        - name: K8S_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: MODE
+          value: ($mode)
+      command:
+        - bash
+        - -ec
+        - |
+          apt update
+          apt install -y siege
+          
+          echo "limit = 3000" > ~/.siegerc
+          # after 20s starts the rollout
+          mode=${MODE}
+          
+          sleep 10 && \
+            kubectl -n ${K8S_NAMESPACE} rollout restart ${mode}/collector-collector && sleep 20 && \
+            kubectl -n ${K8S_NAMESPACE} rollout restart ${mode}/collector-collector && sleep 20 && \
+            kubectl -n ${K8S_NAMESPACE} rollout restart ${mode}/collector-collector \
+          &
+          
+          echo "Starting siege"
+          siege -b -c 500 -t1m http://collector-collector.${K8S_NAMESPACE}:4318
