@@ -44,6 +44,7 @@ type probeConfiguration struct {
 
 const (
 	defaultHealthCheckPath = "/"
+	defaultHealthCheckV2Path = "/health/status"
 	defaultHealthCheckPort = 13133
 )
 
@@ -70,7 +71,7 @@ func ConfigToContainerProbe(config map[interface{}]interface{}) (*corev1.Probe, 
 	healthCheckServiceExtensions := make([]string, 0)
 	for _, ext := range serviceExtensions {
 		parsedExt, ok := ext.(string)
-		if ok && strings.HasPrefix(parsedExt, "health_check") {
+		if ok && (strings.HasPrefix(parsedExt, "health_check") || strings.HasPrefix(parsedExt, "healthcheckv2")) {
 			healthCheckServiceExtensions = append(healthCheckServiceExtensions, parsedExt)
 		}
 	}
@@ -91,15 +92,15 @@ func ConfigToContainerProbe(config map[interface{}]interface{}) (*corev1.Probe, 
 	for _, healthCheckForProbe := range healthCheckServiceExtensions {
 		healthCheckExtension, ok := extensions[healthCheckForProbe]
 		if ok {
-			return createProbeFromExtension(healthCheckExtension)
+			return createProbeFromExtension(healthCheckForProbe, healthCheckExtension)
 		}
 	}
 
 	return nil, errNoExtensionHealthCheck
 }
 
-func createProbeFromExtension(extension interface{}) (*corev1.Probe, error) {
-	probeCfg := extractProbeConfigurationFromExtension(extension)
+func createProbeFromExtension(name string, extension interface{}) (*corev1.Probe, error) {
+	probeCfg := extractProbeConfigurationFromExtension(name, extension)
 	return &corev1.Probe{
 		ProbeHandler: corev1.ProbeHandler{
 			HTTPGet: &corev1.HTTPGetAction{
@@ -110,38 +111,70 @@ func createProbeFromExtension(extension interface{}) (*corev1.Probe, error) {
 	}, nil
 }
 
-func extractProbeConfigurationFromExtension(ext interface{}) probeConfiguration {
+func extractProbeConfigurationFromExtension(name string, ext interface{}) probeConfiguration {
 	extensionCfg, ok := ext.(map[interface{}]interface{})
 	if !ok {
-		return defaultProbeConfiguration()
+		return defaultProbeConfiguration(name)
 	}
 	return probeConfiguration{
-		path: extractPathFromExtensionConfig(extensionCfg),
-		port: extractPortFromExtensionConfig(extensionCfg),
+		path: extractPathFromExtensionConfig(name, extensionCfg),
+		port: extractPortFromExtensionConfig(name, extensionCfg),
 	}
 }
 
-func defaultProbeConfiguration() probeConfiguration {
+func defaultProbeConfiguration(name string) probeConfiguration {
+	var path string
+	if strings.HasPrefix(name, "healthcheckv2") {
+		path = defaultHealthCheckV2Path
+	} else {
+		path = defaultHealthCheckPath
+	}
 	return probeConfiguration{
-		path: defaultHealthCheckPath,
+		path: path,
 		port: intstr.FromInt(defaultHealthCheckPort),
 	}
 }
 
-func extractPathFromExtensionConfig(cfg map[interface{}]interface{}) string {
-	if path, ok := cfg["path"]; ok {
-		if parsedPath, ok := path.(string); ok {
-			return parsedPath
+func extractPathFromExtensionConfig(name string, cfg map[interface{}]interface{}) string {
+	if strings.HasPrefix(name, "healthcheckv2") {
+		if http, ok := cfg["http"].(map[interface{}]interface{}); ok {
+			if status, ok := http["status"].(map[interface{}]interface{}); ok {
+				if path, ok := status["path"]; ok {
+					if parsedPath, ok := path.(string); ok {
+						return parsedPath
+					}
+				}
+			}
 		}
+		return defaultHealthCheckV2Path
+	} else {
+		if path, ok := cfg["path"]; ok {
+			if parsedPath, ok := path.(string); ok {
+				return parsedPath
+			}
+		}
+		return defaultHealthCheckPath
 	}
-	return defaultHealthCheckPath
 }
 
-func extractPortFromExtensionConfig(cfg map[interface{}]interface{}) intstr.IntOrString {
-	endpoint, ok := cfg["endpoint"]
-	if !ok {
-		return defaultHealthCheckEndpoint()
+func extractPortFromExtensionConfig(name string, cfg map[interface{}]interface{}) intstr.IntOrString {
+	var endpoint interface{}
+	if strings.HasPrefix(name, "healthcheckv2") {
+		if http, ok := cfg["http"].(map[interface{}]interface{}); ok {
+			ep, ok := http["endpoint"]
+			if !ok {
+				return defaultHealthCheckEndpoint()
+			}
+			endpoint = ep
+		}
+	} else {
+		ep, ok := cfg["endpoint"]
+		if !ok {
+			return defaultHealthCheckEndpoint()
+		}
+		endpoint = ep
 	}
+
 	parsedEndpoint, ok := endpoint.(string)
 	if !ok {
 		return defaultHealthCheckEndpoint()

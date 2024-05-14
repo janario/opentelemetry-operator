@@ -5,17 +5,34 @@ metadata:
 spec:
   mode: ($mode)
   replicas: 2
+  #image: <repo>:healthcheckv2
 #  lifecycle:
 #    preStop:
 #      exec:
 #        command:
 #          - sleep
-#          - '3'
 #          - '1'
   config: |
     extensions:
-      health_check:
-        endpoint: ${POD_IP}:13133
+      #health_check:
+      #  endpoint: ${POD_IP}:13133
+      healthcheckv2:
+        use_v2: true
+        component_health:
+          include_permanent_errors: false
+          include_recoverable_errors: true
+          recovery_duration: 5m
+        http:
+          endpoint: "${POD_IP}:13133"
+          status:
+            enabled: true
+            path: "/health/status"
+          config:
+            enabled: true
+            path: "/health/config"
+        grpc:
+          endpoint: "${POD_IP}:13132"
+          transport: "tcp"
     receivers:
       otlp:
         protocols:
@@ -28,7 +45,8 @@ spec:
 
     service:
       extensions:
-        - health_check
+        #- health_check
+        - healthcheckv2
       pipelines:
         traces:
           receivers: [otlp]
